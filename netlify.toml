@@ -1,0 +1,15 @@
+# Netlify configuration for Astro SSR site
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+# Enable Netlify dev for local development
+[dev]
+  framework = "astro"
+  command = "npm run dev"
+
+# Remove the redirect that was causing issues with SSR
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200

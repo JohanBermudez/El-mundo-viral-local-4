@@ -1,0 +1,74 @@
+---
+// This component shows demo content when no database is available
+---
+
+<div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+  <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Bienvenido a El Mundo Viral</h2>
+    
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 text-left">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Este es un demo funcional de El Mundo Viral, un portal de noticias moderno desarrollado con Astro y Supabase.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- Demo Card 1 -->
+      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <img src="https://source.unsplash.com/random/800x450?news" alt="Sample News" class="w-full h-48 object-cover" />
+        <div class="p-4">
+          <span class="inline-block px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full mb-2">Destacado</span>
+          <h3 class="text-lg font-bold mb-2">Últimas noticias tecnológicas de 2025</h3>
+          <p class="text-gray-600 text-sm mb-3">Descubre las innovaciones tecnológicas que están cambiando el mundo este año.</p>
+          <div class="flex justify-between items-center text-xs text-gray-500">
+            <span>Hace 2 horas</span>
+            <button class="text-primary-600 font-medium">Leer más</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Demo Card 2 -->
+      <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <img src="https://source.unsplash.com/random/800x450?economy" alt="Sample Economy News" class="w-full h-48 object-cover" />
+        <div class="p-4">
+          <span class="inline-block px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full mb-2">Tendencia</span>
+          <h3 class="text-lg font-bold mb-2">Economía global muestra signos de recuperación</h3>
+          <p class="text-gray-600 text-sm mb-3">Los indicadores económicos muestran una tendencia positiva en los mercados globales.</p>
+          <div class="flex justify-between items-center text-xs text-gray-500">
+            <span>Hace 5 horas</span>
+            <button class="text-primary-600 font-medium">Leer más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="border-t border-gray-200 pt-6 text-center">
+      <p class="text-gray-700 mb-4">
+        Esta es una versión de demostración. Para ver el portal completo con todas las funcionalidades, es necesario configurar Supabase.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="https://github.com/yourusername/el-mundo-viral" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd" />
+          </svg>
+          Ver código fuente
+        </a>
+        <a href="https://docs.astro.build" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+          </svg>
+          Documentación
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

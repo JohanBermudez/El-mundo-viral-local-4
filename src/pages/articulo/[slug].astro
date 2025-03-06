@@ -1,0 +1,259 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { getArticleBySlug, getRelatedArticles } from '../../lib/supabase';
+
+// Explicitly set to server-side rendering
+export const prerender = false;
+
+// Get article by slug (SSR)
+const { slug } = Astro.params;
+
+// Intentamos obtener el artículo directamente
+const { article, error } = await getArticleBySlug(slug || '');
+
+// Fallback a 404 si article not found
+if (error || !article) {
+  return Astro.redirect('/404');
+}
+
+// Extract categories from article_categories
+const categories = article.article_categories?.map(ac => ac.categories) || [];
+const categoryIds = categories.map(c => c.id);
+
+// Get related articles
+const { articles: relatedArticles } = await getRelatedArticles(article.id, categoryIds, 3);
+
+// Format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Format relative time (Instagram style)
+const formatRelativeTime = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) {
+    return 'hace unos segundos';
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `hace ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+  } else if (diffInSeconds < 604800) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `hace ${days} ${days === 1 ? 'día' : 'días'}`;
+  } else {
+    return formatDate(dateString);
+  }
+};
+
+// Calculate reading time
+const readingTime = () => {
+  const wordsPerMinute = 200;
+  const wordCount = article.contenido.trim().split(/\s+/).length;
+  const readingTime = Math.ceil(wordCount / wordsPerMinute);
+  return readingTime;
+};
+
+// Breadcrumb items
+const primaryCategory = categories.length > 0 ? categories[0] : null;
+const breadcrumbItems = primaryCategory 
+  ? [
+      { name: 'Categorías', href: '/' },
+      { name: primaryCategory.nombre, href: `/categoria/${primaryCategory.slug}` },
+      { name: article.titulo }
+    ]
+  : [
+      { name: 'Artículos', href: '/' },
+      { name: article.titulo }
+    ];
+---
+
+<Layout title={article.titulo} description={article.extracto}>
+  <div class="max-w-4xl mx-auto instagram-detail">
+    <!-- Instagram-style Article Header -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+      <div class="p-4 flex items-center justify-between border-b border-gray-100">
+        <div class="flex items-center">
+          <div class="h-10 w-10 rounded-full overflow-hidden mr-3 bg-gradient-to-r from-purple-500 to-pink-500">
+            <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs font-bold">
+              EMV
+            </div>
+          </div>
+          <div>
+            <div class="font-semibold">elmundoviral</div>
+            {primaryCategory && (
+              <a href={`/categoria/${primaryCategory.slug}`} class="text-xs text-gray-500 hover:underline">
+                {primaryCategory.nombre}
+              </a>
+            )}
+          </div>
+        </div>
+        <button class="text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Article Image -->
+      <div class="relative">
+        <img 
+          src={article.imagen_principal || 'https://via.placeholder.com/1200x800?text=El+Mundo+Viral'} 
+          alt={article.titulo}
+          class="w-full h-auto object-cover max-h-[600px]"
+        />
+        
+        <!-- Tags overlay -->
+        <div class="absolute bottom-4 left-4 flex flex-wrap gap-2">
+          {article.destacado && (
+            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm shadow-sm bg-opacity-90">
+              Destacado
+            </span>
+          )}
+          {article.trending && (
+            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm shadow-sm bg-opacity-90">
+              Tendencia
+            </span>
+          )}
+          {article.viral && (
+            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm shadow-sm bg-opacity-90">
+              Viral
+            </span>
+          )}
+        </div>
+      </div>
+      
+      <!-- Engagement Bar -->
+      <div class="p-4 border-b border-gray-100">
+        <div class="flex justify-between items-center">
+          <div class="flex space-x-4">
+            <button class="text-gray-800 hover:text-red-500">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+            </button>
+            <button class="text-gray-800 hover:text-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
+              </svg>
+            </button>
+            <button class="text-gray-800 hover:text-green-500">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+            </button>
+          </div>
+          <button class="text-gray-800 hover:text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+          </button>
+        </div>
+        <div class="mt-2 text-sm font-medium">{readingTime()} minutos de lectura</div>
+        <div class="mt-1 text-xs text-gray-500">{formatRelativeTime(article.created_at)}</div>
+      </div>
+      
+      <!-- Article Content -->
+      <div class="p-5">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">{article.titulo}</h1>
+        <p class="text-lg text-gray-700 mb-6 font-medium">{article.extracto}</p>
+        
+        <div class="prose max-w-none">
+          {article.contenido.split('\n\n').map((paragraph) => (
+            <p class="mb-4 text-gray-800">{paragraph}</p>
+          ))}
+        </div>
+        
+        <!-- Categories -->
+        <div class="mt-8 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <a 
+              href={`/categoria/${category.slug}`}
+              class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+            >
+              #{category.nombre.toLowerCase().replace(/\s+/g, '')}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Comments Section -->
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden p-5 mb-8">
+      <h2 class="text-xl font-bold mb-4">Comentarios</h2>
+      
+      <div class="flex items-start mb-6">
+        <div class="h-10 w-10 rounded-full overflow-hidden mr-3 bg-gray-200">
+          <div class="w-full h-full flex items-center justify-center text-gray-500 text-xs font-bold">
+            TÚ
+          </div>
+        </div>
+        <div class="flex-1">
+          <textarea 
+            placeholder="Añade un comentario..." 
+            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            rows="2"
+          ></textarea>
+          <div class="flex justify-end mt-2">
+            <button class="bg-primary-600 text-white px-4 py-1 rounded-lg text-sm hover:bg-primary-700">
+              Publicar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center py-4 text-gray-500">
+        Sé el primero en comentar este artículo.
+      </div>
+    </div>
+    
+    <!-- Related Articles -->
+    {relatedArticles.length > 0 && (
+      <div class="mb-10">
+        <h2 class="text-xl font-bold mb-6 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+          </svg>
+          Sugeridos para ti
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {relatedArticles.map((relatedArticle) => (
+            <NewsCard article={relatedArticle} viewMode="grid" />
+          ))}
+        </div>
+      </div>
+    )}
+    
+    <div class="text-center mb-10">
+      <a href="javascript:history.back()" class="inline-flex items-center text-primary-600 hover:text-primary-700">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .instagram-detail {
+    padding: 0 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .instagram-detail {
+      padding: 0;
+    }
+  }
+</style>

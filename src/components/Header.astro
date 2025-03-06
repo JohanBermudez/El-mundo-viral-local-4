@@ -1,0 +1,320 @@
+---
+import { getCategories } from '../lib/supabase';
+
+// Use try-catch to handle potential API errors
+let categories = [];
+try {
+  const response = await getCategories();
+  categories = response.categories || [];
+} catch (error) {
+  console.error('Error fetching categories:', error);
+}
+---
+
+<header id="main-header" class="bg-white shadow-sm fixed w-full top-0 z-50 transition-all duration-300">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col transition-all duration-300" id="headerContent">
+      <!-- Main Header Row -->
+      <div class="flex justify-between items-center h-16 transition-all duration-300">
+        <!-- Logo -->
+        <a href="/" class="text-2xl font-bold text-primary-800 flex items-center h-full">
+          El Mundo Viral
+        </a>
+
+        <!-- Right section with category pills (visible on scroll) and search/menu buttons -->
+        <div class="flex items-center">
+          <!-- Category Pills (hidden by default, shown on scroll for desktop ONLY) -->
+          <div id="scrollCategoryPills" class="hidden opacity-0 md:flex space-x-1 transition-opacity duration-300 mr-2 max-md:hidden">
+            <a href="/destacados" class="flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700 hover:bg-yellow-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              Destacados
+            </a>
+            <a href="/tendencias" class="flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              Tendencias
+            </a>
+            <a href="/virales" class="flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 hover:bg-green-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Virales
+            </a>
+            <a href="/ultima-hora" class="flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700 hover:bg-red-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Última hora
+            </a>
+          </div>
+          
+          <!-- Search & Menu Buttons -->
+          <div class="flex items-center space-x-2">
+            <!-- Search Button -->
+            <button id="searchToggleBtn" class="p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none" aria-label="Buscar">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+            
+            <!-- Menu Button -->
+            <button id="menuButton" class="p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none" aria-label="Menu">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search Overlay - Hidden by default -->
+  <div id="searchOverlay" class="fixed inset-0 z-50 bg-white transform -translate-y-full transition-transform duration-300 ease-in-out">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="relative w-full">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar..."
+            class="w-full pl-10 pr-4 py-2 border-b-2 border-gray-300 bg-transparent text-gray-800 focus:outline-none focus:border-primary-500"
+            autocomplete="off"
+          />
+          <svg
+            class="absolute left-0 top-3 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <button id="closeSearchBtn" class="ml-4 p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Menu Overlay - Hidden by default -->
+  <div id="menu" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" aria-hidden="true">
+    <div class="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 translate-x-full overflow-y-auto">
+      <div class="sticky top-0 flex justify-between items-center p-4 border-b border-gray-200 bg-white z-10">
+        <h2 class="text-lg font-bold text-gray-800">Menú</h2>
+        <button id="closeMenuBtn" class="p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none" aria-label="Cerrar menú">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <nav class="p-4">
+        <!-- Sections Links -->
+        <div class="mb-6">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Secciones</h3>
+          <ul class="space-y-1">
+            <li>
+              <a href="/" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Inicio
+              </a>
+            </li>
+            <li>
+              <a href="/ultima-hora" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Última hora
+              </a>
+            </li>
+            <li>
+              <a href="/destacados" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Destacados
+              </a>
+            </li>
+            <li>
+              <a href="/tendencias" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Tendencias
+              </a>
+            </li>
+            <li>
+              <a href="/virales" class="flex items-center px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Virales
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Categories List -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Categorías</h3>
+          <ul class="grid grid-cols-1 gap-1">
+            {categories.map((category) => (
+              <li>
+                <a 
+                  href={`/categoria/${category.slug}`} 
+                  class="flex px-3 py-2 text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                >
+                  <span class="truncate">{category.nombre}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- Add padding to account for fixed header -->
+<div class="h-16" id="headerSpacer"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const header = document.getElementById('main-header');
+    const headerContent = document.getElementById('headerContent');
+    const headerSpacer = document.getElementById('headerSpacer');
+    const scrollCategoryPills = document.getElementById('scrollCategoryPills');
+    const menuButton = document.getElementById('menuButton');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const menu = document.getElementById('menu');
+    const menuContent = menu?.querySelector('div');
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    const closeSearchBtn = document.getElementById('closeSearchBtn');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const searchInput = document.getElementById('searchInput');
+    
+    // Menu toggle functions
+    function openMenu() {
+      if (!menu || !menuContent) return;
+      
+      menu.classList.remove('hidden');
+      setTimeout(() => {
+        menuContent.classList.remove('translate-x-full');
+      }, 10);
+      
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMenu() {
+      if (!menu || !menuContent) return;
+      
+      menuContent.classList.add('translate-x-full');
+      
+      setTimeout(() => {
+        menu.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+    
+    // Search toggle functions
+    function openSearch() {
+      if (!searchOverlay) return;
+      
+      searchOverlay.classList.remove('-translate-y-full');
+      setTimeout(() => {
+        searchInput?.focus();
+      }, 300);
+    }
+    
+    function closeSearch() {
+      if (!searchOverlay) return;
+      
+      searchOverlay.classList.add('-translate-y-full');
+    }
+    
+    // Event listeners for menu
+    if (menuButton) menuButton.addEventListener('click', openMenu);
+    if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+    if (menu) {
+      menu.addEventListener('click', (e) => {
+        if (e.target === menu) closeMenu();
+      });
+    }
+    
+    // Event listeners for search
+    if (searchToggleBtn) searchToggleBtn.addEventListener('click', openSearch);
+    if (closeSearchBtn) closeSearchBtn.addEventListener('click', closeSearch);
+    
+    // Handle escape key to close overlays
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+        closeSearch();
+      }
+    });
+    
+    // Scroll behavior for header
+    const scrollThreshold = 150; // Adjusted threshold for showing category pills
+    
+    window.addEventListener('scroll', () => {
+      if (!header || !headerContent || !headerSpacer || !scrollCategoryPills) return;
+      
+      const currentScroll = window.scrollY;
+      
+      // Check if we're on mobile
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      
+      // Only show category pills on desktop
+      if (currentScroll > scrollThreshold && !isMobile) {
+        // Only for desktop
+        scrollCategoryPills.classList.remove('hidden');
+        // Add a small delay before showing the pills
+        setTimeout(() => {
+          scrollCategoryPills.classList.remove('opacity-0');
+        }, 50);
+        
+        // Common changes for all devices
+        header.classList.add('shadow-md');
+        header.classList.remove('shadow-sm');
+      } else {
+        // Hide category pills when at top or on mobile
+        scrollCategoryPills.classList.add('opacity-0');
+        setTimeout(() => {
+          scrollCategoryPills.classList.add('hidden');
+        }, 300);
+        
+        // Reset header changes
+        if (currentScroll <= scrollThreshold) {
+          header.classList.remove('shadow-md');
+          header.classList.add('shadow-sm');
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+</style>

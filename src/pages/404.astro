@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Set this page to be statically generated
+export const prerender = true;
+---
+
+<Layout title="Página no encontrada">
+  <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+    <img 
+      src="https://images.unsplash.com/photo-1594322436404-5a0526db4d13?q=80&w=1129&auto=format&fit=crop" 
+      alt="Página no encontrada" 
+      class="w-full max-w-md h-auto mb-8 rounded-lg"
+    />
+    
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">404 - Página no encontrada</h1>
+    <p class="text-xl text-gray-600 mb-8 max-w-lg">
+      Lo sentimos, la página que estás buscando no existe o ha sido movida.
+    </p>
+    
+    <div class="space-y-4">
+      <a 
+        href="/" 
+        class="inline-block px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition"
+      >
+        Volver al inicio
+      </a>
+      
+      <div class="pt-4">
+        <p class="text-gray-500">
+          ¿Buscabas algo específico? Prueba usar la barra de búsqueda o navegar por nuestras categorías.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

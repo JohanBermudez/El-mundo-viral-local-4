@@ -1,0 +1,84 @@
+---
+const { activeView } = Astro.props;
+---
+
+<div class="flex items-center space-x-2 mb-6">
+  <button
+    id="gridViewButton"
+    class={`p-2 rounded-md ${activeView === 'grid' ? 'bg-primary-100 text-primary-800' : 'text-gray-500 hover:bg-gray-100'}`}
+    aria-label="Vista en cuadrícula"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+    </svg>
+  </button>
+  <button
+    id="listViewButton"
+    class={`p-2 rounded-md ${activeView === 'list' ? 'bg-primary-100 text-primary-800' : 'text-gray-500 hover:bg-gray-100'}`}
+    aria-label="Vista en lista"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+        clip-rule="evenodd"
+      />
+    </svg>
+  </button>
+</div>
+
+<script>
+  import { viewMode } from '../store/viewStore';
+  
+  // Get buttons
+  const gridButton = document.getElementById('gridViewButton');
+  const listButton = document.getElementById('listViewButton');
+  
+  // Set initial state
+  viewMode.subscribe((value) => {
+    if (gridButton && listButton) {
+      if (value === 'grid') {
+        gridButton.classList.add('bg-primary-100', 'text-primary-800');
+        gridButton.classList.remove('text-gray-500', 'hover:bg-gray-100');
+        
+        listButton.classList.remove('bg-primary-100', 'text-primary-800');
+        listButton.classList.add('text-gray-500', 'hover:bg-gray-100');
+      } else {
+        listButton.classList.add('bg-primary-100', 'text-primary-800');
+        listButton.classList.remove('text-gray-500', 'hover:bg-gray-100');
+        
+        gridButton.classList.remove('bg-primary-100', 'text-primary-800');
+        gridButton.classList.add('text-gray-500', 'hover:bg-gray-100');
+      }
+    }
+  });
+  
+  // Add event listeners
+  if (gridButton) {
+    gridButton.addEventListener('click', () => {
+      viewMode.set('grid');
+      
+      // Dispatch a custom event to notify the page
+      window.dispatchEvent(new CustomEvent('viewModeChanged', { detail: 'grid' }));
+    });
+  }
+  
+  if (listButton) {
+    listButton.addEventListener('click', () => {
+      viewMode.set('list');
+      
+      // Dispatch a custom event to notify the page
+      window.dispatchEvent(new CustomEvent('viewModeChanged', { detail: 'list' }));
+    });
+  }
+</script>
